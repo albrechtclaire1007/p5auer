@@ -14,7 +14,7 @@
   body {
     font-family: 'Schoulschreft', Arial, sans-serif;
     text-align: center;
-    background-color: #fff;
+    background-color: #fffceb; /* soft yellow-white background */
     margin: 0;
     padding: 0;
   }
@@ -22,9 +22,10 @@
   .topbar {
     display: flex;
     justify-content: center;
-    background-color: #d2e3fc; /* P5 blue */
+    background-color: #ffe98a; /* P5 yellow */
     padding: 10px;
     font-size: 24px;
+    border-bottom: 4px solid #f8cf48;
   }
 
   .topbar div {
@@ -37,8 +38,8 @@
   }
 
   #prompt {
-    margin-top: 20px;
-    font-size: 36px;
+    margin-top: 25px;
+    font-size: 38px;
   }
 
   #clock {
@@ -58,12 +59,12 @@
     text-align: center;
     transform: translate(-50%, -50%);
     font-size: 28px;
+    color: black;
   }
 
   .hand {
     position: absolute;
     width: 4px;
-    height: 120px;
     top: 30px;
     left: 148px;
     transform-origin: bottom center;
@@ -72,16 +73,21 @@
   }
 
   #hourHand { background-color: red; height: 80px; top: 70px; }
-  #minuteHand { background-color: blue; }
+  #minuteHand { background-color: blue; height: 120px; }
 
   #validate {
     font-size: 26px;
-    margin-top: 30px;
+    margin-top: 35px;
     padding: 10px 30px;
     border: none;
     border-radius: 10px;
-    background-color: #d2e3fc;
+    background-color: #ffe98a;
+    border: 2px solid #f8cf48;
     cursor: pointer;
+  }
+
+  #validate:hover {
+    background-color: #fff3b0;
   }
 
   #feedback {
@@ -97,8 +103,8 @@
   <div onclick="alert('Kommt geschwënn!')">2. Spill</div>
 </div>
 
-<div id="prompt">Et ass fënnef op siwen</div>
-<audio id="audio" src="audio/fennef_op_siwen.mp3"></audio>
+<div id="prompt">Et ass Véierel op zéng</div>
+<audio id="audio" src="audio/veierel_op_zeng.mp3"></audio>
 <button onclick="document.getElementById('audio').play()">🔊 Lauschter</button>
 
 <div id="clock"></div>
@@ -154,18 +160,18 @@ function makeDraggable(hand) {
 makeDraggable(hourHand);
 makeDraggable(minuteHand);
 
-// expected time (example: 5 op siwen)
-let correctHour = 7;
-let correctMinute = 5;
+// expected example time (Véierel op zéng)
+let correctHour = 10;
+let correctMinute = 15;
 
 function checkTime() {
   const h = parseFloat(hourHand.dataset.angle || 0);
   const m = parseFloat(minuteHand.dataset.angle || 0);
-  const minuteGuess = ((m + 360) % 360) / 6; // each 6° per minute
-  const hourGuess = ((h + 360) % 360) / 30; // each 30° per hour
+  const minuteGuess = ((m + 360) % 360) / 6; // 6° per minute
+  const hourGuess = ((h + 360) % 360) / 30; // 30° per hour
 
   let okM = Math.abs(minuteGuess - correctMinute) <= 3;
-  let okH = Math.abs(hourGuess - correctHour % 12) <= 0.5;
+  let okH = Math.abs(hourGuess - (correctHour % 12)) <= 0.5;
 
   document.getElementById("feedback").textContent =
     (okM && okH) ? "✅ Richteg!" : "❌ Nach eng Kéier!";
@@ -173,3 +179,4 @@ function checkTime() {
 </script>
 </body>
 </html>
+
