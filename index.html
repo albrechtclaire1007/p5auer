@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="lb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P5 – D'Zäit astellen</title>
+<style>
+  @font-face {
+    font-family: 'Schoulschreft';
+    src: url('https://github.com/albrechtclaire1007/schoulschreft/raw/main/schoulschreft_bold%5B2%5D.TTF') format('truetype');
+    font-weight: bold;
+  }
+
+  body {
+    font-family: 'Schoulschreft', Arial, sans-serif;
+    text-align: center;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: center;
+    background-color: #d2e3fc; /* P5 blue */
+    padding: 10px;
+    font-size: 24px;
+  }
+
+  .topbar div {
+    margin: 0 20px;
+    cursor: pointer;
+  }
+
+  .topbar div.active {
+    text-decoration: underline;
+  }
+
+  #prompt {
+    margin-top: 20px;
+    font-size: 36px;
+  }
+
+  #clock {
+    position: relative;
+    margin: 40px auto;
+    width: 300px;
+    height: 300px;
+    border: 10px solid red;
+    border-radius: 50%;
+    background: white;
+  }
+
+  .number {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+  }
+
+  .hand {
+    position: absolute;
+    width: 4px;
+    height: 120px;
+    top: 30px;
+    left: 148px;
+    transform-origin: bottom center;
+    cursor: grab;
+    border-radius: 2px;
+  }
+
+  #hourHand { background-color: red; height: 80px; top: 70px; }
+  #minuteHand { background-color: blue; }
+
+  #validate {
+    font-size: 26px;
+    margin-top: 30px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 10px;
+    background-color: #d2e3fc;
+    cursor: pointer;
+  }
+
+  #feedback {
+    margin-top: 15px;
+    font-size: 28px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="active">1. Spill</div>
+  <div onclick="alert('Kommt geschwënn!')">2. Spill</div>
+</div>
+
+<div id="prompt">Et ass fënnef op siwen</div>
+<audio id="audio" src="audio/fennef_op_siwen.mp3"></audio>
+<button onclick="document.getElementById('audio').play()">🔊 Lauschter</button>
+
+<div id="clock"></div>
+
+<button id="validate" onclick="checkTime()">Validéieren</button>
+<div id="feedback"></div>
+
+<script>
+const clock = document.getElementById("clock");
+const radius = 140;
+
+// draw numbers
+for (let n = 1; n <= 12; n++) {
+  const angle = (n - 3) * (Math.PI * 2) / 12;
+  const x = 150 + radius * Math.cos(angle);
+  const y = 150 + radius * Math.sin(angle);
+  const num = document.createElement("div");
+  num.className = "number";
+  num.style.left = x + "px";
+  num.style.top = y + "px";
+  num.textContent = n;
+  clock.appendChild(num);
+}
+
+// hands
+const hourHand = document.createElement("div");
+hourHand.id = "hourHand";
+hourHand.className = "hand";
+clock.appendChild(hourHand);
+
+const minuteHand = document.createElement("div");
+minuteHand.id = "minuteHand";
+minuteHand.className = "hand";
+clock.appendChild(minuteHand);
+
+// dragging
+function makeDraggable(hand) {
+  let isDragging = false;
+  clock.addEventListener("mousedown", (e) => {
+    if (e.target === hand) isDragging = true;
+  });
+  document.addEventListener("mouseup", () => isDragging = false);
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const rect = clock.getBoundingClientRect();
+    const x = e.clientX - rect.left - 150;
+    const y = e.clientY - rect.top - 150;
+    const angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
+    hand.style.transform = `rotate(${angle}deg)`;
+    hand.dataset.angle = angle;
+  });
+}
+makeDraggable(hourHand);
+makeDraggable(minuteHand);
+
+// expected time (example: 5 op siwen)
+let correctHour = 7;
+let correctMinute = 5;
+
+function checkTime() {
+  const h = parseFloat(hourHand.dataset.angle || 0);
+  const m = parseFloat(minuteHand.dataset.angle || 0);
+  const minuteGuess = ((m + 360) % 360) / 6; // each 6° per minute
+  const hourGuess = ((h + 360) % 360) / 30; // each 30° per hour
+
+  let okM = Math.abs(minuteGuess - correctMinute) <= 3;
+  let okH = Math.abs(hourGuess - correctHour % 12) <= 0.5;
+
+  document.getElementById("feedback").textContent =
+    (okM && okH) ? "✅ Richteg!" : "❌ Nach eng Kéier!";
+}
+</script>
+</body>
+</html>
