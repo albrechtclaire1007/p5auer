@@ -1,361 +1,752 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="lb">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>P5 – 1. Spill: D'Zäit astellen</title>
+<title>P5 – Wéi vill Auer ass et? Üben, Lauschteren, Quiz & Schreif</title>
 <style>
   @font-face{
     font-family:'Schoulschrëft';
     src:url('https://raw.githubusercontent.com/albrechtclaire1007/schoulschreft/main/schoulschreft_bold%5B2%5D.TTF') format('truetype');
-    font-weight:bold;
-    font-display:swap;
+    font-weight:bold; font-display:swap;
   }
 
   :root{
-    --p5-yellow:#f3c51f;   /* bright border */
-    --p5-yellow-soft:#fff0a1; /* soft bg */
-    --btn-radius:18px;
+    /* P5 yellows */
+    --p5:#ffd51e;     /* main */
+    --p5-soft:#fcf09c;/* soft */
+
+    /* hands */
+    --minute:#75b7cb; /* keep minute hand BLUE */
+    --hour:#f1583f;
+
+    --face:url('https://i.postimg.cc/6qC1Vnjg/temp-Imagel6-ZZRm.avif');
+    --btn-r:18px;
   }
 
   *{box-sizing:border-box}
   body{
-    margin:0;
-    font-family:'Schoulschrëft', Arial, sans-serif;
-    background:#fffdf4;
-    color:#111;
-    display:flex;
-    flex-direction:column;
-    min-height:100vh;
+    margin:0; min-height:100vh; background:#fffef8; color:#111;
+    font-family:'Schoulschrëft', Arial, sans-serif; display:flex; flex-direction:column;
   }
 
-  /* top nav (1. Spill / 2. Spill) */
-  .topbar{
-    display:flex;
-    justify-content:center;
-    gap:16px;
-    padding:14px 12px;
-    background:var(--p5-yellow-soft);
-    border-bottom:4px solid var(--p5-yellow);
-  }
-  .tab-btn{
-    background:#fff;
-    border:3px solid var(--p5-yellow);
-    border-radius:999px;
-    padding:8px 18px;
-    font-size:22px;
-    cursor:pointer;
-    transition:.15s ease;
-  }
-  .tab-btn.active{ background:#fffbe2 }
-  .tab-btn:focus{ outline:3px solid #000; outline-offset:2px }
+  /* tabs */
+  .topbar{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:14px 12px;background:var(--p5-soft);border-bottom:4px solid var(--p5);}
+  .tab{background:#fff;border:3px solid var(--p5);border-radius:999px;padding:8px 16px;font-size:20px;cursor:pointer;font-family:'Schoulschrëft',Arial,sans-serif;}
+  .tab.active{background:#fff8c7}
 
-  /* prompt row with arrows */
-  .prompt-row{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:12px;
-    padding:18px 10px 8px;
-  }
-  .arrow{
-    min-width:54px;
-    height:44px;
-    border:3px solid var(--p5-yellow);
-    background:#fff;
-    border-radius:var(--btn-radius);
-    font-size:28px;
-    line-height:1;
-    cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    user-select:none;
-  }
-  .arrow:active{ transform:scale(0.98) }
-
-  #prompt{
-    background:#fff;
-    border:3px solid var(--p5-yellow);
-    border-radius:20px;
-    padding:8px 16px;
-    font-size:34px;
-    min-width:260px;
-    max-width:min(90vw, 900px);
-  }
-
-  /* action buttons row */
-  .controls{
-    display:flex;
-    justify-content:center;
-    gap:12px;
-    padding:10px 0 0;
-  }
-  .btn{
-    border:3px solid var(--p5-yellow);
-    background:#fff;
-    border-radius:var(--btn-radius);
-    padding:10px 20px;
-    font-size:22px;
-    cursor:pointer;
-  }
-  .btn:active{ transform:scale(0.98) }
+  .section{display:none;padding:18px 12px 30px;}
+  .section.active{display:block}
+  .center{text-align:center}
+  .chip{display:inline-block;padding:8px 14px;border-radius:16px;border:3px solid var(--p5);background:#fff;font-size:28px;}
+  .btn{font-family:'Schoulschrëft',Arial,sans-serif;border:3px solid var(--p5);background:#fff;border-radius:var(--btn-r);padding:10px 20px;font-size:22px;cursor:pointer;}
+  .btn[disabled]{opacity:.5; cursor:not-allowed;}
+  .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+  .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;}
 
   /* clock */
-  .stage{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:18px 12px 28px;
+  .clock-wrap{display:flex;flex-direction:column;align-items:center;}
+  .clock{
+    position:relative;width:360px;height:360px;
+    background:#fff center/contain no-repeat;background-image:var(--face);
+    border-radius:50%;margin:16px auto;box-shadow:0 6px 18px rgba(0,0,0,.06);touch-action:none;
   }
-  #clock{
-    position:relative;
-    width:360px; height:360px;
-    background:#fff;
-    border:12px solid red;          /* thick red border */
-    border-radius:50%;
-    margin:18px auto;
-    box-shadow:0 6px 18px rgba(0,0,0,.06);
-  }
-  .number{
-    position:absolute;
-    width:36px; height:36px;
-    font-size:30px;
-    text-align:center; line-height:36px;
-    transform:translate(-50%, -50%);
-    color:#000;
-  }
-  .hand{
-    position:absolute;
-    left:50%; top:50%;
-    transform-origin:50% 100%;
-    cursor:grab;
-    border-radius:6px;
-    touch-action:none;
-  }
-  #hourHand{
-    width:8px; height:110px;
-    background:red; /* hour hand red */
-    transform:translate(-50%, -100%) rotate(0deg);
-  }
-  #minuteHand{
-    width:6px; height:150px;
-    background:blue; /* minute hand blue */
-    transform:translate(-50%, -100%) rotate(0deg);
-  }
-  .pivot{
-    position:absolute;
-    left:50%; top:50%;
-    width:18px; height:18px;
-    background:#fff;
-    border:4px solid #c00;
-    border-radius:50%;
-    transform:translate(-50%, -50%);
-  }
+  .tick{position:absolute;width:44px;height:44px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;}
+  .hand{position:absolute;left:50%;top:50%;transform-origin:50% 100%;border-radius:6px;touch-action:none;cursor:grab;z-index:1;}
+  .min{  width:6px;height:150px;background:var(--minute);transform:translate(-50%,-100%) rotate(0deg);z-index:2;}
+  .hour{ width:8px;height:110px;background:var(--hour); transform:translate(-50%,-100%) rotate(0deg);z-index:3;}
+  .pivot{position:absolute;left:50%;top:50%;width:18px;height:18px;background:#fff;border:4px solid var(--hour);border-radius:50%;transform:translate(-50%,-50%);z-index:4;}
 
-  #feedback{
-    min-height:36px;
-    font-size:26px;
-    margin-top:6px;
-  }
+  .readout{font-size:26px;min-height:32px}
+  .options{display:flex;flex-direction:column;gap:10px;max-width:920px;margin:0 auto;}
+  .opt-btn{text-align:left}
+  .quiz-actions{display:flex;gap:10px;justify-content:center;margin-top:12px;}
+  .quiz-feedback{min-height:32px;font-size:24px;text-align:center;margin-top:8px;}
+
+  /* Schreif UI */
+  .toggle{display:inline-flex;border:3px solid var(--p5);border-radius:999px;overflow:hidden;font-family:'Schoulschrëft',Arial,sans-serif}
+  .toggle button{border:0;padding:8px 14px;font-size:20px;cursor:pointer;background:#fff;font-family:'Schoulschrëft',Arial,sans-serif}
+  .toggle .on{background:#ffe574}
+
+  .sentence{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .etass{font-size:26px}
+
+  /* vertical choice list (P5) */
+  .vstack{display:flex;flex-direction:column;gap:10px;min-width:240px}
+  .choice{border:3px solid var(--p5);border-radius:14px;padding:10px 14px;font-size:22px;background:#fff;cursor:pointer;font-family:'Schoulschrëft',Arial,sans-serif;text-align:center}
+  .choice.active{background:#fff3b3}
+
+  .letters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .lbox{width:34px;height:44px;border:3px solid #ecd974;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#fff}
+
+  .answerbox{min-height:44px;min-width:220px;border:3px dashed #ecd974;border-radius:12px;padding:10px 14px;font-size:26px;background:#fff}
+
+  /* QWERTZ keyboard */
+  .kbd{display:grid;gap:8px;max-width:960px;margin:12px auto 0;
+       grid-template-columns:repeat(12, minmax(28px, 1fr))}
+  .key{border:3px solid var(--p5);border-radius:10px;padding:10px 8px;background:#fff;font-size:22px;cursor:pointer;user-select:none;text-align:center}
+  .key.wide{grid-column:span 2}
+  .key.wider{grid-column:span 3}
 
   @media (max-width:480px){
-    #clock{ width:300px; height:300px }
-    #hourHand{ height:92px }
-    #minuteHand{ height:128px }
-    .number{ font-size:26px; width:32px; height:32px; line-height:32px }
-    #prompt{ font-size:28px }
+    .clock{width:300px;height:300px}
+    .hour{height:92px}.min{height:128px}
+    .tick{width:36px;height:36px}
+    .chip{font-size:24px}.btn{font-size:20px}
+    .kbd{grid-template-columns:repeat(10, minmax(28px, 1fr))}
   }
 </style>
 </head>
 <body>
 
-<!-- top navigation -->
 <div class="topbar">
-  <button class="tab-btn active" aria-current="page">1. Spill</button>
-  <button class="tab-btn" onclick="alert('2. Spill kënnt geschwënn.')" aria-label="2. Spill">2. Spill</button>
+  <button class="tab active" data-target="aueren">Auer üben</button>
+  <button class="tab" data-target="lauschteren">1. Spill – Lauschteren</button>
+  <button class="tab" data-target="quiz">2. Spill – Quiz</button>
+  <button class="tab" data-target="schreif">3. Spill – Schreif</button>
 </div>
 
-<!-- prompt + arrows -->
-<div class="prompt-row">
-  <button class="arrow" id="prevBtn" aria-label="Virdrun">&lt;</button>
-  <div id="prompt">Et ass fënnef op siwen</div>
-  <button class="arrow" id="nextBtn" aria-label="Weider">&gt;</button>
-</div>
+<!-- Auer üben -->
+<section id="aueren" class="section active">
+  <div class="center">
+    <div class="chip">Probéier e puer Auerzäiten aus</div>
+    <div class="mt12">
+      <label style="font-size:20px">
+        <input type="checkbox" id="toggleDigital" checked>
+        Digital Auer uweisen
+      </label>
+    </div>
+  </div>
+  <div class="clock-wrap mt16">
+    <div id="c1" class="clock"></div>
+    <div id="c1readout" class="readout center">12:00</div>
+  </div>
+</section>
 
-<!-- listen + validate -->
-<div class="controls">
-  <button class="btn" id="listenBtn">Lauschteren</button>
-  <button class="btn" id="validateBtn">Validéieren</button>
-</div>
+<!-- 1. Spill – Lauschteren (no full hours; half + quarters + new 5-mins) -->
+<section id="lauschteren" class="section">
+  <div class="center">
+    <div class="chip">Wéi vill Auer ass et? Lauschteren!</div>
+    <div class="mt8">Stell d’Auer no dem Audio.</div>
+    <div class="mt12"><button class="btn" id="pEnableAudio" style="display:none">🔊 Audio aktivéieren</button></div>
+  </div>
+  <div class="clock-wrap mt16">
+    <div id="c2" class="clock"></div>
+    <div class="row mt12">
+      <button class="btn" id="pReplay" disabled>⟲ Nach eng Kéier</button>
+      <button class="btn" id="pValidate">Validéieren</button>
+    </div>
+    <div class="readout center" id="pFeedback"></div>
+  </div>
+</section>
 
-<div class="stage">
-  <div id="clock"></div>
-  <div id="feedback"></div>
-</div>
+<!-- 2. Spill – Quiz -->
+<section id="quiz" class="section">
+  <div class="center">
+    <div class="chip">Wéi vill Auer ass et? Quiz!</div>
+  </div>
+  <div class="clock-wrap mt16">
+    <div id="c3" class="clock"></div>
+    <div class="options mt12" id="quizOptions"></div>
+    <div class="quiz-actions">
+      <button class="btn" id="quizRetry" disabled>Probéier nach eemol</button>
+      <button class="btn" id="quizNext" disabled>Weider</button>
+    </div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <div class="center mt12" id="quizEnd" style="display:none;font-size:24px">Fäerdeg! Super geschafft 🎉</div>
+  </div>
+</section>
+
+<!-- 3. Spill – Schreif -->
+<section id="schreif" class="section">
+  <div class="center">
+    <div class="chip">Wéi vill Auer ass et? Schreif!</div>
+    <div class="mt8">
+      <span style="font-size:20px;margin-right:8px">Schwieregkeet:</span>
+      <span class="toggle" id="lvlToggle">
+        <button data-lvl="easy" class="on">einfach</button>
+        <button data-lvl="hard">schwéier</button>
+        <button data-lvl="xhard">extra schwéier</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="clock-wrap mt16">
+    <div id="c4" class="clock"></div>
+
+    <!-- sentence layout for P5 -->
+    <div class="sentence">
+      <div class="etass">Et ass</div>
+
+      <!-- VERTICAL options block -->
+      <div class="vstack" id="vOpts"></div>
+
+      <!-- Right side input -->
+      <div id="lettersWrap" class="letters"></div>
+      <div id="oneBox" class="answerbox" style="display:none"></div>
+      <div id="fullBox" class="answerbox" style="display:none; min-width:420px"></div>
+    </div>
+
+    <div class="row mt12">
+      <button class="btn" id="wCheck">Iwwerpréiwen</button>
+      <button class="btn" id="wNext" disabled>Weider</button>
+    </div>
+    <div class="readout center" id="wFb"></div>
+
+    <div class="kbd" id="kbd"></div>
+    <div class="center mt12" id="writeEnd" style="display:none;font-size:24px">Alles fäerdeg – gutt gemaach! 🎉</div>
+  </div>
+</section>
 
 <script>
-/* ---------- DATA (15 P5 examples) ---------- */
-/* each item: label (display), h (target hour 1–12), m (target minutes), audio (placeholder) */
-const items = [
-  { label:"Et ass fënnef op siwen",               h:7,  m:5,  audio:"audio/fennef_op_siwen.mp3" },
-  { label:"Et ass zéng vir aacht",                h:8,  m:50, audio:"audio/zeng_vir_aacht.mp3" },
-  { label:"Et ass zwanzeg op dräi",               h:3,  m:20, audio:"audio/zwanzeg_op_draei.mp3" },
-  { label:"Et ass fënnef vir hallwer néng",       h:8,  m:25, audio:"audio/fennef_vir_hallwer_neng.mp3" },
-  { label:"Et ass fënnef op hallwer zéng",        h:9,  m:35, audio:"audio/fennef_op_hallwer_zeng.mp3" },
-  { label:"Et ass zwanzeg vir zwielef",           h:12, m:40, audio:"audio/zwanzeg_vir_zwielef.mp3" },
-  { label:"Et ass zéng op fënnef",                h:5,  m:10, audio:"audio/zeng_op_fennef.mp3" },
-  { label:"Et ass fënnef vir sechs",              h:6,  m:55, audio:"audio/fennef_vir_sechs.mp3" },
-  { label:"Et ass zwanzeg op néng",               h:9,  m:20, audio:"audio/zwanzeg_op_neng.mp3" },
-  { label:"Et ass zéng vir hallwer eelef",        h:10, m:20, audio:"audio/zeng_vir_hallwer_eelef.mp3" },
-  { label:"Et ass fënnef op hallwer zwee",        h:1,  m:35, audio:"audio/fennef_op_hallwer_zwee.mp3" },
-  { label:"Et ass zwanzeg vir véier",             h:4,  m:40, audio:"audio/zwanzeg_vir_veer.mp3" },
-  { label:"Et ass zéng op zwielef",               h:12, m:10, audio:"audio/zeng_op_zwielef.mp3" },
-  { label:"Et ass fënnef vir aacht",              h:8,  m:55, audio:"audio/fennef_vir_aacht.mp3" },
-  { label:"Et ass fënnef op hallwer siwen",       h:6,  m:35, audio:"audio/fennef_op_hallwer_siwen.mp3" }
-];
-
-/* shuffle for variety each load */
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
-shuffle(items);
-
-let idx = 0;
-
-/* ---------- CLOCK RENDER ---------- */
-const clock = document.getElementById('clock');
-const R = 150; // number ring radius for 360px clock
-const center = {x:180, y:180};
-
-function drawNumbers(){
+/* ----------------- shared helpers ----------------- */
+function setHand(el,deg){ el.style.transform=`translate(-50%,-100%) rotate(${deg}deg)`; el.dataset.deg=deg }
+function degFromPointer(e, clockEl){
+  const r=clockEl.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  const px=(e.touches?e.touches[0].clientX:e.clientX);
+  const py=(e.touches?e.touches[0].clientY:e.clientY);
+  let d=Math.atan2(py-cy, px-cx)*180/Math.PI + 90;
+  if(d<0) d+=360;
+  return d;
+}
+function placeTicks(clockEl){
+  clockEl.querySelectorAll('.tick').forEach(t=>t.remove());
+  const rect=clockEl.getBoundingClientRect();
+  const radius = rect.width/2 - 24;
+  const cx=rect.width/2, cy=rect.height/2;
   for(let n=1;n<=12;n++){
-    const ang = (n-3)*(Math.PI*2)/12;
-    const x = center.x + R*Math.cos(ang);
-    const y = center.y + R*Math.sin(ang);
-    const d = document.createElement('div');
-    d.className = 'number';
-    d.style.left = x+'px';
-    d.style.top = y+'px';
-    d.textContent = n;
-    clock.appendChild(d);
+    const ang=(n-3)*(Math.PI*2)/12;
+    const x=cx + radius*Math.cos(ang);
+    const y=cy + radius*Math.sin(ang);
+    const t=document.createElement('div');
+    t.className='tick'; t.dataset.n=n;
+    t.style.left=x+'px'; t.style.top=y+'px';
+    clockEl.appendChild(t);
   }
 }
 
-function createHands(){
-  const hour = document.createElement('div');
-  hour.id = 'hourHand'; hour.className='hand';
-  const min = document.createElement('div');
-  min.id = 'minuteHand'; min.className='hand';
-  const pivot = document.createElement('div');
-  pivot.className = 'pivot';
-  clock.appendChild(hour);
-  clock.appendChild(min);
-  clock.appendChild(pivot);
-  return { hour, min };
-}
+/* ---------- Auer üben ---------- */
+function coupledClock(rootId, readoutId, showDigital=true){
+  const root=document.getElementById(rootId);
+  placeTicks(root);
+  const hour=document.createElement('div'); hour.className='hand hour';
+  const min =document.createElement('div'); min.className='hand min';
+  const pivot=document.createElement('div'); pivot.className='pivot';
+  root.append(hour,min,pivot);
+  window.addEventListener('resize', ()=>placeTicks(root));
 
-drawNumbers();
-const hands = createHands();
+  let H=12, M=0;
+  const ro=document.getElementById(readoutId);
 
-/* ---------- DRAG / TOUCH to rotate ---------- */
-function angleFromPointer(e){
-  const rect = clock.getBoundingClientRect();
-  const cx = rect.left + rect.width/2;
-  const cy = rect.top + rect.height/2;
-  const px = (e.touches ? e.touches[0].clientX : e.clientX);
-  const py = (e.touches ? e.touches[0].clientY : e.clientY);
-  const dx = px - cx;
-  const dy = py - cy;
-  // 0deg is 12 o'clock; increase clockwise
-  let deg = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-  if (deg < 0) deg += 360;
-  return deg;
-}
+  function normalize(){ while(M<0){M+=60;H--} while(M>=60){M-=60;H++} while(H<=0){H+=12} while(H>12){H-=12} }
+  function render(){ setHand(min,M*6); setHand(hour,(H%12)*30 + M*0.5); if(ro) ro.textContent = showDigital ? `${String(((H%12)||12)).padStart(2,'0')}:${String(M).padStart(2,'0')}` : ''; }
+  function setTime(h,m){ H=h; M=m; normalize(); render(); }
 
-function makeRotatable(el){
-  let active=false;
-  const start = (ev)=>{ if(ev.target!==el) return; active=true; ev.preventDefault(); }
-  const move  = (ev)=>{ if(!active) return; const deg = angleFromPointer(ev); el.style.transform = `translate(-50%, -100%) rotate(${deg}deg)`; el.dataset.deg = deg; }
-  const end   = ()=>{ active=false; }
-
-  el.addEventListener('mousedown', start);
-  window.addEventListener('mousemove', move);
-  window.addEventListener('mouseup', end);
-
-  el.addEventListener('touchstart', start, {passive:false});
-  window.addEventListener('touchmove', move, {passive:false});
-  window.addEventListener('touchend', end);
-}
-makeRotatable(hands.hour);
-makeRotatable(hands.min);
-
-/* ---------- UTIL: set prompt & (optional) set default hand positions ---------- */
-const promptEl = document.getElementById('prompt');
-const feedbackEl = document.getElementById('feedback');
-
-function smallestAngleDiff(a,b){
-  let d = Math.abs(a-b) % 360;
-  return d>180 ? 360-d : d;
-}
-
-function loadItem(i){
-  const it = items[i];
-  promptEl.textContent = it.label;
-  feedbackEl.textContent = "";
-
-  // reset hands to 12:00 (visual)
-  setHand(hands.min, 0);
-  setHand(hands.hour, 0);
-
-  // pre-store targets for validation
-  const mAngle = it.m * 6;                         // 6° per minute
-  const hAngle = ((it.h % 12) * 30) + it.m * 0.5;  // 30° per hour + 0.5° per min
-  hands.min.dataset.target = mAngle;
-  hands.hour.dataset.target = hAngle;
-
-  // set audio
-  audio.src = it.audio;
-}
-
-function setHand(el, deg){
-  el.style.transform = `translate(-50%, -100%) rotate(${deg}deg)`;
-  el.dataset.deg = deg;
-}
-
-/* ---------- VALIDATION ---------- */
-const MIN_TOL = 9;   // degrees (~±1.5 minutes)
-const HOUR_TOL = 7;  // degrees (~±14 minutes on hour hand; accounts for minute coupling)
-
-function validate(){
-  const mDeg = parseFloat(hands.min.dataset.deg || 0);
-  const hDeg = parseFloat(hands.hour.dataset.deg || 0);
-  const mTarget = parseFloat(hands.min.dataset.target);
-  const hTarget = parseFloat(hands.hour.dataset.target);
-
-  const okM = smallestAngleDiff(mDeg, mTarget) <= MIN_TOL;
-  const okH = smallestAngleDiff(hDeg, hTarget) <= HOUR_TOL;
-
-  if(okM && okH){
-    feedbackEl.textContent = "Richteg!";
-    // go next after short pause
-    setTimeout(()=> goNext(), 800);
-  }else{
-    feedbackEl.textContent = "Nach eng Kéier!";
+  function drag(el, mode){
+    let on=false;
+    const start=e=>{ if(e.target!==el) return; on=true; e.preventDefault(); }
+    const move =e=>{
+      if(!on) return;
+      const d=degFromPointer(e, root);
+      if(mode==='min'){
+        const prev=M*6;
+        const delta=(((d - prev + 540) % 360) - 180);
+        const dm=Math.round(delta/6);
+        setTime(H, M+dm);
+      }else{
+        let total=d/30; if(total<0) total+=12;
+        let base=Math.floor(total)||12;
+        let mins=Math.round((total - Math.floor(total))*60);
+        if(mins===60){ mins=0; base=(base%12)+1; }
+        setTime(base, mins);
+      }
+    };
+    const end=()=>{ on=false; };
+    el.addEventListener('mousedown',start);
+    window.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',end);
+    el.addEventListener('touchstart',start,{passive:false});
+    window.addEventListener('touchmove',move,{passive:false});
+    window.addEventListener('touchend',end);
   }
+  drag(min,'min'); drag(hour,'hour');
+
+  setTime(10,10);
+  return { setTime };
 }
+const simple = coupledClock('c1','c1readout', true);
+document.getElementById('toggleDigital').addEventListener('change', e=>{
+  document.getElementById('c1readout').style.display = e.target.checked ? 'block' : 'none';
+});
 
-/* ---------- NAV ---------- */
-function goPrev(){ idx = (idx - 1 + items.length) % items.length; loadItem(idx); }
-function goNext(){ idx = (idx + 1) % items.length; loadItem(idx); }
+/* ---------- 1) Lauschteren (P5 set) ---------- */
+(function(){
+  const RAW_P3 = "https://github.com/albrechtclaire1007/p3auer/raw/refs/heads/main/";
+  const RAW_P4 = "https://github.com/albrechtclaire1007/p4auer/raw/refs/heads/main/";
+  const RAW_P5 = "https://github.com/albrechtclaire1007/p5auer/raw/refs/heads/main/";
 
-/* ---------- AUDIO ---------- */
-const audio = new Audio();
-document.getElementById('listenBtn').addEventListener('click', ()=> audio.play());
+  const items = [
+    // keep half-hours from P3
+    { h:2,  m:30, audio: RAW_P3 + "230.mp3"  },
+    { h:4,  m:30, audio: RAW_P3 + "430.mp3"  },
+    { h:6,  m:30, audio: RAW_P3 + "630.mp3"  },
+    { h:7,  m:30, audio: RAW_P3 + "730.mp3"  },
+    { h:8,  m:30, audio: RAW_P3 + "830.mp3"  },
+    { h:9,  m:30, audio: RAW_P3 + "930.mp3"  },
+    { h:11, m:30, audio: RAW_P3 + "1130.mp3" },
+    // keep quarters from P4
+    { h:10, m:15, audio: RAW_P4 + "1015.mp3" },
+    { h:12, m:15, audio: RAW_P4 + "1215.mp3" },
+    { h:8,  m:15, audio: RAW_P4 + "815.mp3"  },
+    { h:5,  m:15, audio: RAW_P4 + "515.mp3"  },
+    { h:2,  m:45, audio: RAW_P4 + "245.mp3"  },
+    { h:6,  m:45, audio: RAW_P4 + "645.mp3"  },
+    { h:9,  m:45, audio: RAW_P4 + "945.mp3"  },
+    { h:11, m:45, audio: RAW_P4 + "1145.mp3" },
+    // NEW five-minute items from P5 repo (no full hours)
+    { h:11, m:40, audio: RAW_P5 + "1140.mp3" },
+    { h:12, m:10, audio: RAW_P5 + "1210.mp3" },
+    { h:3,  m:20, audio: RAW_P5 + "320.mp3"  },
+    { h:3,  m:40, audio: RAW_P5 + "340.mp3"  },
+    { h:5,  m:10, audio: RAW_P5 + "510.mp3"  },
+    { h:5,  m:55, audio: RAW_P5 + "555.mp3"  },
+    { h:6,  m:35, audio: RAW_P5 + "635.mp3"  },
+    { h:7,  m:5,  audio: RAW_P5 + "705.mp3"  },
+    { h:7,  m:50, audio: RAW_P5 + "750.mp3"  },
+    { h:7,  m:55, audio: RAW_P5 + "755.mp3"  },
+    { h:8,  m:25, audio: RAW_P5 + "825.mp3"  },
+    { h:9,  m:20, audio: RAW_P5 + "920.mp3"  },
+    { h:9,  m:35, audio: RAW_P5 + "935.mp3"  },
+  ];
 
-/* ---------- BUTTON WIRES ---------- */
-document.getElementById('validateBtn').addEventListener('click', validate);
-document.getElementById('prevBtn').addEventListener('click', goPrev);
-document.getElementById('nextBtn').addEventListener('click', goNext);
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+  shuffle(items);
+  let idx=0;
 
-/* ---------- INIT ---------- */
-loadItem(idx);
+  const root=document.getElementById('c2');
+  placeTicks(root);
+  const hour=document.createElement('div'); hour.className='hand hour';
+  const min =document.createElement('div'); min.className='hand min';
+  const pivot=document.createElement('div'); pivot.className='pivot';
+  root.append(hour,min,pivot);
+  window.addEventListener('resize', ()=>placeTicks(root));
+
+  const fb=document.getElementById('pFeedback');
+  const enableBtn=document.getElementById('pEnableAudio');
+  const replayBtn=document.getElementById('pReplay');
+  const audio=new Audio();
+
+  function tryPlay(reset=false){
+    if(reset) audio.currentTime = 0;
+    enableBtn.style.display='none';
+    const p = audio.play();
+    if(p && typeof p.then==='function'){
+      p.then(()=>{ replayBtn.disabled = false; }).catch(()=>{ enableBtn.style.display='inline-block'; });
+    }else{ replayBtn.disabled=false; }
+  }
+
+  function load(i){
+    if(i>=items.length){
+      fb.textContent = 'Alles fäerdeg – top!';
+      replayBtn.disabled = true;
+      document.getElementById('pValidate').disabled = true;
+      return;
+    }
+    const it=items[i];
+    setHand(min,0); setHand(hour,0);
+    min.dataset.target = (it.m*6);
+    hour.dataset.target = ((it.h%12)*30 + it.m*0.5);
+    audio.src = it.audio;
+    replayBtn.disabled = true;
+    fb.textContent = '';
+    audio.oncanplay = ()=>{ replayBtn.disabled = false; audio.oncanplay = null; };
+    tryPlay();
+  }
+
+  enableBtn.addEventListener('click', ()=>tryPlay(false));
+  replayBtn.addEventListener('click', ()=>tryPlay(true));
+
+  function smallest(a,b){ let d=Math.abs(a-b)%360; return d>180?360-d:d }
+  const MIN_TOL=9, HOUR_TOL=7;
+
+  function drag(el){
+    let on=false;
+    const start=e=>{ if(e.target!==el) return; on=true; e.preventDefault(); }
+    const move=e=>{ if(!on) return; const d=degFromPointer(e, root); setHand(el,d); }
+    const end =()=>{ on=false; };
+    el.addEventListener('mousedown',start);
+    window.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',end);
+    el.addEventListener('touchstart',start,{passive:false});
+    window.addEventListener('touchmove',move,{passive:false});
+    window.addEventListener('touchend',end);
+  }
+  drag(min); drag(hour);
+
+  document.getElementById('pValidate').addEventListener('click', ()=>{
+    if(idx>=items.length) return;
+    const mDeg=parseFloat(min.dataset.deg||0), hDeg=parseFloat(hour.dataset.deg||0);
+    const mt=parseFloat(min.dataset.target),   ht=parseFloat(hour.dataset.target);
+    const okM = smallest(mDeg, mt) <= MIN_TOL;
+    const okH = smallest(hDeg, ht) <= HOUR_TOL;
+    fb.textContent = (okM && okH) ? 'Richteg!' : 'Nach eng Kéier!';
+    if(okM && okH){ setTimeout(()=>{ idx++; load(idx); }, 700); }
+  });
+
+  load(idx);
+})();
+
+/* ---------- 2) Quiz (focus on 5-minute expressions) ---------- */
+(function(){
+  function setClock(h,m){
+    setHand(min, m*6);
+    setHand(hour, (h%12)*30 + m*0.5);
+  }
+
+  // Helpers to build plausible wrong options:
+  function wrongSameHour(h,m,word){ // e.g., choose op vs vir confusion
+    const isAfter = m<30;
+    const base = isAfter ? 'op' : 'vir';
+    const other = isAfter ? 'vir' : 'op';
+    return `Et ass ${word} ${other} ${hourWord(targetHour(h,m,base))}`;
+  }
+  function targetHour(h,m,kind){ // returns hour name for op/vir/hallwer targets
+    if(kind==='op') return hourWord(h);
+    if(kind==='vir') return hourWord((h%12)+1);
+    return hourWord(h);
+  }
+  function hourWord(n){
+    const map=[,'eent','zwee','dräi','véier','fënnef','sechs','siwen','aacht','néng','zéng','eelef','zwielef'];
+    return map[((n-1+12)%12)+1];
+  }
+
+  const quizData = [
+    // New 5-minute times (avoid ones used in listening exactly; still similar field)
+    {h:11,m:35, correct:"Et ass fënnef vir zwielef"},
+    {h:12,m:20, correct:"Et ass zwanzeg op eent"},
+    {h:3, m:25, correct:"Et ass fënnef vir hallwer véier"},
+    {h:3, m:45, correct:"Et ass Véierel vir véier"},
+    {h:5, m:10, correct:"Et ass zéng op fënnef"},
+    {h:5, m:50, correct:"Et ass zéng vir sechs"},
+    {h:6, m:35, correct:"Et ass fënnef vir siwen"},
+    {h:7, m:5,  correct:"Et ass fënnef op siwen"},
+    {h:7, m:55, correct:"Et ass fënnef vir aacht"},
+    {h:8, m:25, correct:"Et ass fënnef vir hallwer aacht"},
+    {h:9, m:20, correct:"Et ass zwanzeg op néng"},
+    {h:9, m:35, correct:"Et ass fënnef vir zéng"},
+    // a couple of quarters/halves to mix lightly
+    {h:10,m:15, correct:"Et ass Véierel op zéng"},
+    {h:11,m:45, correct:"Et ass Véierel vir zwielef"},
+  ].map(q=>{
+    // Build distractors:
+    // 1) swap op/vir (same words), 2) wrong hour (previous/next), 3) “translation” trap
+    const txt=q.correct.replace('Et ass ','');
+    const parts=txt.split(' ');
+    // crude heuristics:
+    let bad1 = txt.includes('op') ? txt.replace('op','vir') : txt.replace('vir','op');
+    let bad2 = txt;
+    if(txt.includes('op')){
+      // make wrong hour (previous)
+      bad2 = txt.replace(/op .+$/, m=>{
+        const hName = m.split(' ').slice(1).join(' ');
+        const names=['eent','zwee','dräi','véier','fënnef','sechs','siwen','aacht','néng','zéng','eelef','zwielef'];
+        const idx = names.indexOf(hName);
+        const prev = names[(idx-1+12)%12];
+        return 'op '+prev;
+      });
+    }else if(txt.includes('vir')){
+      bad2 = txt.replace(/vir .+$/, m=>{
+        const hName = m.split(' ').slice(1).join(' ');
+        const names=['eent','zwee','dräi','véier','fënnef','sechs','siwen','aacht','néng','zéng','eelef','zwielef'];
+        const idx = names.indexOf(hName);
+        const next = names[(idx+1)%12];
+        return 'vir '+next;
+      });
+    }else if(txt.includes('hallwer')){
+      bad1 = txt.includes('op') ? txt.replace('op','vir') : txt.replace('vir','op');
+      bad2 = txt.replace('hallwer','Véierel'); // nonsense swap
+    }
+    const transTrap = txt.replace(' op ',' ').replace(' vir ',' ');
+    return {
+      h:q.h, m:q.m,
+      opts:[
+        'Et ass '+q.correct.replace('Et ass ',''),
+        'Et ass '+bad1,
+        'Et ass '+transTrap
+      ],
+      correct:0
+    };
+  });
+
+  let order=[...quizData.keys()]; for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+  let qIndex = 0;
+
+  const root=document.getElementById('c3');
+  placeTicks(root);
+  const hour=document.createElement('div'); hour.className='hand hour';
+  const min =document.createElement('div'); min.className='hand min';
+  const pivot=document.createElement('div'); pivot.className='pivot';
+  root.append(hour,min,pivot);
+  window.addEventListener('resize', ()=>placeTicks(root));
+
+  const optsEl = document.getElementById('quizOptions');
+  const retryBtn = document.getElementById('quizRetry');
+  const nextBtn  = document.getElementById('quizNext');
+  const feedback = document.getElementById('quizFeedback');
+  const endMsg = document.getElementById('quizEnd');
+
+  function renderQuestion(i){
+    if(i>=order.length){
+      optsEl.innerHTML=''; feedback.textContent=''; retryBtn.disabled=true; nextBtn.disabled=true;
+      endMsg.style.display='block'; return;
+    }
+    endMsg.style.display='none';
+    const q = quizData[order[i]];
+    setHand(min, q.m*6);
+    setHand(hour, (q.h%12)*30 + q.m*0.5);
+    optsEl.innerHTML = '';
+    feedback.textContent = '';
+    retryBtn.disabled = true;
+    nextBtn.disabled = true;
+    q.opts.forEach((text, idx)=>{
+      const b=document.createElement('button');
+      b.className='btn opt-btn';
+      b.textContent=text;
+      b.addEventListener('click', ()=>{
+        [...optsEl.children].forEach(btn=>btn.disabled=true);
+        if(idx===q.correct){
+          feedback.textContent='Richteg!';
+          nextBtn.disabled = false;
+        }else{
+          feedback.textContent='Probéier nach eemol';
+          retryBtn.disabled = false;
+          [...optsEl.children].forEach(btn=>btn.disabled=false);
+        }
+      });
+      optsEl.appendChild(b);
+    });
+  }
+  retryBtn.addEventListener('click', ()=>{
+    feedback.textContent = '';
+    retryBtn.disabled = true;
+  });
+  nextBtn.addEventListener('click', ()=>{
+    qIndex++;
+    renderQuestion(qIndex);
+  });
+
+  renderQuestion(qIndex);
+})();
+
+/* ---------- 3) Schreif (three levels; vertical options; keyboard + external typing) ---------- */
+(function(){
+  // Option list covering P5 wording (5-min jumps)
+  const OPTION_STRINGS = [
+    "fënnef op","zéng op","véierel op","zwanzeg op","fënnef vir hallwer",
+    "hallwer",
+    "fënnef no hallwer","zwanzeg vir","véierel vir","zéng vir","fënnef vir"
+  ];
+  // Prompts
+  const prompts = [
+    {h:11,m:35, type:"fënnef vir",      hour:"zwielef",   full:"Et ass fënnef vir zwielef"},
+    {h:12,m:10, type:"zéng op",         hour:"eent",      full:"Et ass zéng op eent"},
+    {h:3, m:25, type:"fënnef vir hallwer", hour:"véier",  full:"Et ass fënnef vir hallwer véier"},
+    {h:3, m:45, type:"véierel vir",     hour:"véier",     full:"Et ass Véierel vir véier"},
+    {h:5, m:10, type:"zéng op",         hour:"fënnef",    full:"Et ass zéng op fënnef"},
+    {h:5, m:50, type:"zéng vir",        hour:"sechs",     full:"Et ass zéng vir sechs"},
+    {h:6, m:35, type:"fënnef no hallwer",hour:"siwen",    full:"Et ass fënnef no hallwer siwen"},
+    {h:7, m:5,  type:"fënnef op",       hour:"siwen",     full:"Et ass fënnef op siwen"},
+    {h:7, m:55, type:"fënnef vir",      hour:"aacht",     full:"Et ass fënnef vir aacht"},
+    {h:8, m:25, type:"fënnef vir hallwer", hour:"néng",   full:"Et ass fënnef vir hallwer néng"},
+    {h:9, m:20, type:"zwanzeg op",      hour:"néng",      full:"Et ass zwanzeg op néng"},
+    {h:9, m:35, type:"fënnef no hallwer",hour:"zéng",     full:"Et ass fënnef no hallwer zéng"},
+  ];
+  let order=[...prompts.keys()]; for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+  let idx=0;
+
+  const root=document.getElementById('c4');
+  placeTicks(root);
+  const hourH=document.createElement('div'); hourH.className='hand hour';
+  const minH =document.createElement('div'); minH.className='hand min';
+  const pivot=document.createElement('div'); pivot.className='pivot';
+  root.append(hourH,minH,pivot);
+  window.addEventListener('resize', ()=>placeTicks(root));
+
+  const vOpts=document.getElementById('vOpts');
+  const lettersWrap=document.getElementById('lettersWrap');
+  const oneBox = document.getElementById('oneBox');
+  const fullBox= document.getElementById('fullBox');
+  const fb = document.getElementById('wFb');
+  const checkBtn = document.getElementById('wCheck');
+  const nextBtn = document.getElementById('wNext');
+  const endMsg = document.getElementById('writeEnd');
+
+  /* level toggle */
+  let level='easy';
+  const tog = document.getElementById('lvlToggle');
+  [...tog.children].forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      [...tog.children].forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      level = btn.dataset.lvl;
+      render(idx);
+    });
+  });
+
+  /* selected option */
+  let selected='';
+  function setSelected(which){
+    selected=which;
+    [...vOpts.children].forEach(c=>c.classList.toggle('active', c.dataset.val===which));
+  }
+
+  function setClock(h,m){
+    setHand(minH, m*6);
+    setHand(hourH, (h%12)*30 + m*0.5);
+  }
+
+  function buildOptions(){
+    vOpts.innerHTML='';
+    OPTION_STRINGS.forEach(str=>{
+      const b=document.createElement('button');
+      b.className='choice';
+      b.textContent = /véierel/i.test(str) ? (str.replace(/^véierel/,'Véierel')) : str;
+      b.dataset.val=str;
+      b.addEventListener('click',()=>setSelected(str));
+      vOpts.appendChild(b);
+    });
+  }
+
+  function render(i){
+    if(i>=order.length){
+      fb.textContent=''; checkBtn.disabled=true; nextBtn.disabled=true; endMsg.style.display='block';
+      return;
+    }
+    endMsg.style.display='none';
+    const p = prompts[order[i]];
+    setClock(p.h, p.m);
+    buildOptions();
+    setSelected('');
+    fb.textContent='';
+    nextBtn.disabled=true;
+
+    lettersWrap.innerHTML=''; oneBox.style.display='none'; fullBox.style.display='none';
+    if(level==='easy'){
+      // per-letter boxes for hour
+      for(let k=0;k<p.hour.length;k++){
+        const d=document.createElement('div'); d.className='lbox'; d.dataset.idx=k;
+        lettersWrap.appendChild(d);
+      }
+    }else if(level==='hard'){
+      oneBox.style.display='block'; oneBox.textContent='';
+    }else{
+      fullBox.style.display='block'; fullBox.textContent='';
+    }
+  }
+
+  function current(){ return prompts[order[idx]]; }
+  function typedHour(){
+    const p=current();
+    if(level==='easy'){
+      return [...lettersWrap.querySelectorAll('.lbox')].map(b=>b.textContent||'').join('');
+    }else if(level==='hard'){
+      return oneBox.textContent||'';
+    }else{
+      // full sentence
+      return fullBox.textContent||'';
+    }
+  }
+
+  checkBtn.addEventListener('click', ()=>{
+    const p=current();
+    if(level==='xhard'){
+      const ok = typedHour() === p.full;
+      fb.textContent = ok ? 'Richteg!' : 'Nach eng Kéier!';
+      if(ok) nextBtn.disabled=false;
+      return;
+    }
+    const okType = (selected === p.type);
+    const okWord = typedHour() === p.hour;
+    fb.textContent = (okType && okWord) ? 'Richteg!' : 'Nach eng Kéier!';
+    if(okType && okWord){ nextBtn.disabled=false; }
+  });
+  nextBtn.addEventListener('click', ()=>{ idx++; render(idx); });
+
+  /* Keyboard (on-screen) + external keyboard input */
+  const kbd=document.getElementById('kbd');
+  let caps=false;
+  function addKey(baseLower, span=1, id=''){
+    const b=document.createElement('div');
+    b.className='key'+(span===2?' wide':'')+(span===3?' wider':'');
+    if(id) b.id=id;
+    b.dataset.lower = baseLower;
+    b.dataset.upper = baseLower.toUpperCase();
+    b.textContent = caps ? b.dataset.upper : b.dataset.lower;
+    b.addEventListener('click', ()=>{
+      const ch = caps ? b.dataset.upper : b.dataset.lower;
+      press(ch);
+    });
+    kbd.appendChild(b);
+  }
+  function refreshKeyFaces(){
+    [...kbd.children].forEach(k=>{
+      if(k.classList.contains('key')){
+        if(k.id==='capsKey') k.style.background = caps ? '#fff2a5' : '#fff';
+        else k.textContent = caps ? (k.dataset.upper||k.textContent) : (k.dataset.lower||k.textContent);
+      }
+    });
+  }
+  function writeChar(ch){
+    if(level==='xhard'){ fullBox.textContent += ch; return; }
+    if(level==='hard'){ oneBox.textContent += ch; return; }
+    const box=[...lettersWrap.querySelectorAll('.lbox')].find(b=>!b.textContent);
+    if(box) box.textContent = ch;
+  }
+  function backspace(){
+    if(level==='xhard'){ fullBox.textContent = fullBox.textContent.slice(0,-1); return; }
+    if(level==='hard'){ oneBox.textContent = oneBox.textContent.slice(0,-1); return; }
+    const boxes=[...lettersWrap.querySelectorAll('.lbox')];
+    for(let i=boxes.length-1;i>=0;i--){ if(boxes[i].textContent){ boxes[i].textContent=''; break; } }
+  }
+  function press(ch){
+    if(ch==='CAPS'){ caps=!caps; refreshKeyFaces(); return; }
+    if(ch==='⌫'){ backspace(); return; }
+    writeChar(ch);
+  }
+  // Build QWERTZ rows (lowercase base; diacritics included)
+  const row1 = ["q","w","e","r","t","z","u","i","o","p","ü","'"];
+  const row2 = ["a","s","d","f","g","h","j","k","l","ö","ä","-"];
+  const row3 = ["y","x","c","v","b","n","m","é","ë","ä","é","è"];
+  row1.forEach(k=>addKey(k));
+  row2.forEach(k=>addKey(k));
+  row3.forEach(k=>addKey(k));
+  addKey("CAPS",2,'capsKey'); addKey("⌫",2); addKey(" ",3);
+
+  // External keyboard typing
+  window.addEventListener('keydown',(e)=>{
+    // allow standard keys
+    if(e.key==='Backspace'){ backspace(); e.preventDefault(); return; }
+    if(e.key==='CapsLock'){ caps=!caps; refreshKeyFaces(); return; }
+    if(e.key.length===1){
+      const ch = caps ? e.key.toUpperCase() : e.key;
+      writeChar(ch);
+      e.preventDefault();
+    }
+  });
+
+  render(idx);
+})();
+
+/* tabs */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(btn.dataset.target).classList.add('active');
+  });
+});
 </script>
 </body>
 </html>
